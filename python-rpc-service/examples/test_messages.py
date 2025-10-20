@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""
+Test EDI Messages
+
+This script contains sample EDI messages for testing the service.
+"""
+
+# Sample EDI 850 Purchase Order
+EDI_850_SAMPLE = """ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *210101*1200*^*00501*000000001*0*P*>~
+GS*PO*SENDER*RECEIVER*20210101*1200*1*X*005010~
+ST*850*0001~
+BEG*00*SA*PO123456**20210101~
+REF*DP*DEPARTMENT123~
+N1*BY*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+N1*ST*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+PO1*1*10*EA*25.50**VP*SKU123*PD*WIDGET~
+PO1*2*5*EA*15.75**VP*SKU456*PD*GADGET~
+CTT*2~
+SE*15*0001~
+GE*1*1~
+IEA*1*000000001~"""
+
+# Sample EDI 810 Invoice
+EDI_810_SAMPLE = """ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *210101*1200*^*00501*000000002*0*P*>~
+GS*IN*SENDER*RECEIVER*20210101*1200*2*X*005010~
+ST*810*0001~
+BIG*20210101*INV123456**20210201~
+REF*PO*PO123456~
+N1*BT*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+N1*ST*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+IT1*1*10*EA*25.50**VP*SKU123*PD*WIDGET~
+IT1*2*5*EA*15.75**VP*SKU456*PD*GADGET~
+TDS*255~
+CTT*2~
+SE*15*0001~
+GE*1*2~
+IEA*1*000000002~"""
+
+# Sample EDI 856 Advance Ship Notice
+EDI_856_SAMPLE = """ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *210101*1200*^*00501*000000003*0*P*>~
+GS*SH*SENDER*RECEIVER*20210101*1200*3*X*005010~
+ST*856*0001~
+BSN*00*SHIP123456*20210101*1200~
+REF*PO*PO123456~
+N1*SF*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+N1*ST*ACME CORP*92*12345~
+N3*123 MAIN ST~
+N4*NEW YORK*NY*10001~
+HL*1**S~
+PRF*PO123456~
+HL*2*1*O~
+TD1*CTN*10~
+TD5*B*2*UPS~
+HL*3*2*P~
+MAN*GM*123456789~
+HL*4*3*I~
+LIN*1*VP*SKU123*PD*WIDGET~
+SN1**10*EA~
+CTT*4~
+SE*20*0001~
+GE*1*3~
+IEA*1*000000003~"""
+
+# Sample EDI 997 Functional Acknowledgment
+EDI_997_SAMPLE = """ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *210101*1200*^*00501*000000004*0*P*>~
+GS*FA*SENDER*RECEIVER*20210101*1200*4*X*005010~
+ST*997*0001~
+AK1*PO*1~
+AK2*850*0001~
+AK5*A~
+AK9*A*1*1*0~
+SE*6*0001~
+GE*1*4~
+IEA*1*000000004~"""
+
+# Invalid EDI message (missing required segments)
+EDI_INVALID_SAMPLE = """ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *210101*1200*^*00501*000000001*0*P*>~
+GS*PO*SENDER*RECEIVER*20210101*1200*1*X*005010~
+ST*850*0001~
+BEG*00*SA*PO123456**20210101~
+SE*15*0001~
+GE*1*1~
+IEA*1*000000001~"""
+
+# Test messages dictionary
+TEST_MESSAGES = {
+    "850": EDI_850_SAMPLE,
+    "810": EDI_810_SAMPLE,
+    "856": EDI_856_SAMPLE,
+    "997": EDI_997_SAMPLE,
+    "invalid": EDI_INVALID_SAMPLE
+}
+
+
+def get_test_message(message_type: str) -> str:
+    """Get a test EDI message by type."""
+    return TEST_MESSAGES.get(message_type, "")
+
+
+def list_test_messages() -> list:
+    """List available test message types."""
+    return list(TEST_MESSAGES.keys())
+
+
+if __name__ == "__main__":
+    print("Available test EDI messages:")
+    for msg_type in list_test_messages():
+        print(f"  {msg_type}")
+    
+    print("\nSample EDI 850 Purchase Order:")
+    print(EDI_850_SAMPLE)

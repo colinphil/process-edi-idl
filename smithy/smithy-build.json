@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "sources": [
+    "edi-service.smithy",
+    "edi-message-types.smithy"
+  ],
+  "plugins": {
+    "openapi": {
+      "service": "com.colinleephillips.process.edi#EdiService",
+      "protocol": "aws.protocols#restJson1",
+      "jsonContentType": "application/json"
+    },
+    "aws-sdk": {
+      "service": "com.colinleephillips.process.edi#EdiService",
+      "protocol": "aws.protocols#restJson1"
+    }
+  },
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy:smithy-model:1.28.0",
+      "software.amazon.smithy:smithy-openapi:1.28.0",
+      "software.amazon.smithy:smithy-aws-traits:1.28.0"
+    ]
+  }
+}

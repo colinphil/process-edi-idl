@@ -1,0 +1,384 @@
+syntax = "proto3";
+
+package edi;
+
+option go_package = "github.com/colinleephillips/process-edi-idl/generated/edi";
+
+/**
+* Generic EDI Processing Service
+* This service provides a unified API for processing multiple EDI message types.
+*
+* It supports:
+* - Multiple EDI Types: 
+*    - 850 (Purchase Order)
+*    - 810 (Invoice)
+*    - 856 (Advance Ship Notice)
+*    - 997 (Functional Acknowledgment)
+*    - and more
+* - Unified API: Single service interface for all EDI message types
+* - Extensible Design: Easy to add new EDI message types
+*/
+service EdiService {
+  // Process any EDI message type
+  rpc ProcessEdiMessage(ProcessEdiMessageRequest) returns (ProcessEdiMessageResponse);
+  
+  // Get supported EDI message types
+  rpc GetSupportedMessageTypes(GetSupportedMessageTypesRequest) returns (GetSupportedMessageTypesResponse);
+  
+  // Validate EDI message format without processing
+  rpc ValidateEdiMessage(ValidateEdiMessageRequest) returns (ValidateEdiMessageResponse);
+}
+
+// Request message for processing any EDI message
+message ProcessEdiMessageRequest {
+  // The raw EDI message content
+  string edi_message = 1;
+  
+  // EDI message type (e.g., "850", "810", "856", "997")
+  string message_type = 2;
+  
+  // Optional: Customer/partner identifier
+  string customer_id = 3;
+  
+  // Optional: Processing options
+  ProcessingOptions options = 4;
+  
+  // Optional: Message-specific processing parameters
+  map<string, string> parameters = 5;
+}
+
+// Response message for EDI processing
+message ProcessEdiMessageResponse {
+  // Processing status
+  ProcessingStatus status = 1;
+  
+  // EDI message type that was processed
+  string message_type = 2;
+  
+  // Parsed EDI data (oneof to support different message types)
+  oneof parsed_data {
+    PurchaseOrderData purchase_order = 3;
+    InvoiceData invoice = 4;
+    AdvanceShipNoticeData advance_ship_notice = 5;
+    FunctionalAcknowledgmentData functional_acknowledgment = 6;
+    // Add more message types as needed
+  }
+  
+  // Processing messages/errors
+  repeated ProcessingMessage messages = 7;
+  
+  // Processing timestamp
+  string processed_at = 8;
+  
+  // Raw parsed segments (for debugging/audit)
+  repeated EdiSegment parsed_segments = 9;
+}
+
+// Request for getting supported message types
+message GetSupportedMessageTypesRequest {
+  // Optional: Filter by customer/partner
+  string customer_id = 1;
+}
+
+// Response with supported message types
+message GetSupportedMessageTypesResponse {
+  // List of supported EDI message types
+  repeated EdiMessageType supported_types = 1;
+}
+
+// Request for validating EDI message format
+message ValidateEdiMessageRequest {
+  // The raw EDI message content
+  string edi_message = 1;
+  
+  // EDI message type
+  string message_type = 2;
+  
+  // Optional: Customer/partner identifier
+  string customer_id = 3;
+}
+
+// Response for EDI message validation
+message ValidateEdiMessageResponse {
+  // Validation status
+  ProcessingStatus status = 1;
+  
+  // Validation messages
+  repeated ProcessingMessage messages = 2;
+  
+  // Detected EDI version (e.g., "005010", "004010")
+  string edi_version = 3;
+  
+  // Detected message type
+  string detected_message_type = 4;
+}
+
+// EDI Message Type information
+message EdiMessageType {
+  // Message type code (e.g., "850", "810")
+  string code = 1;
+  
+  // Human-readable name
+  string name = 2;
+  
+  // Description of the message type
+  string description = 3;
+  
+  // Whether this message type is supported
+  bool supported = 4;
+  
+  // Required segments for this message type
+  repeated string required_segments = 5;
+  
+  // Optional segments for this message type
+  repeated string optional_segments = 6;
+}
+
+// Processing options for EDI messages
+message ProcessingOptions {
+  // Whether to validate the EDI format
+  bool validate_format = 1;
+  
+  // Whether to perform business rule validation
+  bool validate_business_rules = 2;
+  
+  // Whether to return detailed parsing information
+  bool include_parsing_details = 3;
+  
+  // Whether to return raw parsed segments
+  bool include_raw_segments = 4;
+  
+  // Target processing environment
+  string environment = 5; // e.g., "production", "staging", "test"
+  
+  // Message-specific validation rules
+  map<string, string> validation_rules = 6;
+}
+
+// Processing status enumeration
+enum ProcessingStatus {
+  PROCESSING_STATUS_UNSPECIFIED = 0;
+  PROCESSING_STATUS_SUCCESS = 1;
+  PROCESSING_STATUS_VALIDATION_ERROR = 2;
+  PROCESSING_STATUS_PARSING_ERROR = 3;
+  PROCESSING_STATUS_BUSINESS_RULE_ERROR = 4;
+  PROCESSING_STATUS_UNSUPPORTED_MESSAGE_TYPE = 5;
+  PROCESSING_STATUS_INTERNAL_ERROR = 6;
+}
+
+// Processing message for errors or warnings
+message ProcessingMessage {
+  // Message level
+  MessageLevel level = 1;
+  
+  // Message code
+  string code = 2;
+  
+  // Human-readable message
+  string message = 3;
+  
+  // Optional: Field or segment that caused the issue
+  string field = 4;
+  
+  // Optional: Line number in the EDI message
+  int32 line_number = 5;
+  
+  // Optional: Element position within segment
+  int32 element_position = 6;
+}
+
+// Message level enumeration
+enum MessageLevel {
+  MESSAGE_LEVEL_UNSPECIFIED = 0;
+  MESSAGE_LEVEL_INFO = 1;
+  MESSAGE_LEVEL_WARNING = 2;
+  MESSAGE_LEVEL_ERROR = 3;
+}
+
+// Generic EDI Segment representation
+message EdiSegment {
+  // Segment identifier (e.g., "ISA", "BEG", "PO1")
+  string segment_id = 1;
+  
+  // Segment elements
+  repeated string elements = 2;
+  
+  // Line number in the original message
+  int32 line_number = 3;
+  
+  // Segment position in the message
+  int32 position = 4;
+}
+
+// Common EDI data structures that can be reused across message types
+
+// Party information (used in multiple EDI types)
+message Party {
+  // Entity identifier code
+  string entity_identifier_code = 1;
+  
+  // Name
+  string name = 2;
+  
+  // Identification number
+  string identification_number = 3;
+  
+  // Address
+  Address address = 4;
+  
+  // Contact information
+  Contact contact = 5;
+}
+
+// Address information
+message Address {
+  // Address line 1
+  string address_line_1 = 1;
+  
+  // Address line 2
+  string address_line_2 = 2;
+  
+  // City
+  string city = 3;
+  
+  // State or province
+  string state_province = 4;
+  
+  // Postal code
+  string postal_code = 5;
+  
+  // Country code
+  string country_code = 6;
+}
+
+// Contact information
+message Contact {
+  // Contact name
+  string name = 1;
+  
+  // Phone number
+  string phone = 2;
+  
+  // Email address
+  string email = 3;
+  
+  // Fax number
+  string fax = 4;
+}
+
+// Product information
+message Product {
+  // Product identifier
+  string product_id = 1;
+  
+  // Product description
+  string description = 2;
+  
+  // Product identifier type (e.g., "SKU", "UPC", "ISBN")
+  string identifier_type = 3;
+  
+  // Manufacturer part number
+  string manufacturer_part_number = 4;
+  
+  // Brand name
+  string brand_name = 5;
+}
+
+// Quantity information
+message Quantity {
+  // Quantity value
+  double value = 1;
+  
+  // Unit of measure code
+  string unit_of_measure = 2;
+  
+  // Unit of measure description
+  string unit_of_measure_description = 3;
+}
+
+// Price information
+message Price {
+  // Price value
+  double value = 1;
+  
+  // Currency code
+  string currency_code = 2;
+  
+  // Price basis code
+  string price_basis_code = 3;
+}
+
+// Reference number information
+message ReferenceNumber {
+  // Reference number type
+  string reference_type = 1;
+  
+  // Reference number value
+  string reference_value = 2;
+  
+  // Reference number description
+  string description = 3;
+}
+
+// Date/time information
+message DateTime {
+  // Date in YYYY-MM-DD format
+  string date = 1;
+  
+  // Time in HH:MM:SS format
+  string time = 2;
+  
+  // Time zone
+  string timezone = 3;
+  
+  // Date/time qualifier
+  string qualifier = 4;
+}
+
+// Monetary amounts summary
+message MonetaryAmounts {
+  // Total amount
+  Price total_amount = 1;
+  
+  // Tax amount
+  Price tax_amount = 2;
+  
+  // Freight amount
+  Price freight_amount = 3;
+  
+  // Discount amount
+  Price discount_amount = 4;
+  
+  // Terms discount amount
+  Price terms_discount_amount = 5;
+  
+  // Additional amounts (flexible for different message types)
+  map<string, Price> additional_amounts = 6;
+}
+
+// Line item information (generic for different EDI types)
+message LineItem {
+  // Line item number
+  string line_number = 1;
+  
+  // Product/service information
+  Product product = 2;
+  
+  // Quantity information
+  Quantity quantity = 3;
+  
+  // Price information
+  Price price = 4;
+  
+  // Extended price
+  Price extended_price = 5;
+  
+  // Dates associated with this line item
+  map<string, DateTime> dates = 6;
+  
+  // Additional line item notes
+  repeated string notes = 7;
+  
+  // Line item specific data (flexible for different message types)
+  map<string, string> additional_data = 8;
+}

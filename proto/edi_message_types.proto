@@ -1,0 +1,320 @@
+syntax = "proto3";
+
+package edi;
+
+option go_package = "github.com/colinleephillips/process-edi-idl/generated/edi";
+
+// Import the base EDI service definitions
+import "edi_service.proto";
+
+// EDI 850 Purchase Order Data
+message PurchaseOrderData {
+  // Purchase Order Number
+  string po_number = 1;
+  
+  // Purchase Order Date
+  string po_date = 2;
+  
+  // Requested Ship Date
+  string requested_ship_date = 3;
+  
+  // Requested Delivery Date
+  string requested_delivery_date = 4;
+  
+  // Buyer information
+  Party buyer = 5;
+  
+  // Seller information
+  Party seller = 6;
+  
+  // Ship-to address
+  Party ship_to = 7;
+  
+  // Bill-to address
+  Party bill_to = 8;
+  
+  // Purchase order line items
+  repeated PurchaseOrderLineItem line_items = 9;
+  
+  // Total monetary amounts
+  MonetaryAmounts monetary_amounts = 10;
+  
+  // Additional notes or comments
+  repeated string notes = 11;
+  
+  // Reference numbers
+  repeated ReferenceNumber reference_numbers = 12;
+}
+
+// EDI 850 specific line item
+message PurchaseOrderLineItem {
+  // Line item number
+  string line_number = 1;
+  
+  // Product/service information
+  Product product = 2;
+  
+  // Quantity ordered
+  Quantity quantity_ordered = 3;
+  
+  // Unit price
+  Price unit_price = 4;
+  
+  // Extended price
+  Price extended_price = 5;
+  
+  // Requested ship date for this line item
+  string requested_ship_date = 6;
+  
+  // Requested delivery date for this line item
+  string requested_delivery_date = 7;
+  
+  // Additional line item notes
+  repeated string notes = 8;
+}
+
+// EDI 810 Invoice Data
+message InvoiceData {
+  // Invoice Number
+  string invoice_number = 1;
+  
+  // Invoice Date
+  string invoice_date = 2;
+  
+  // Due Date
+  string due_date = 3;
+  
+  // Invoice Type Code
+  string invoice_type_code = 4;
+  
+  // Bill-to party
+  Party bill_to = 5;
+  
+  // Remit-to party
+  Party remit_to = 6;
+  
+  // Ship-from party
+  Party ship_from = 7;
+  
+  // Ship-to party
+  Party ship_to = 8;
+  
+  // Invoice line items
+  repeated InvoiceLineItem line_items = 9;
+  
+  // Total monetary amounts
+  MonetaryAmounts monetary_amounts = 10;
+  
+  // Payment terms
+  string payment_terms = 11;
+  
+  // Reference numbers
+  repeated ReferenceNumber reference_numbers = 12;
+  
+  // Additional notes
+  repeated string notes = 13;
+}
+
+// EDI 810 specific line item
+message InvoiceLineItem {
+  // Line item number
+  string line_number = 1;
+  
+  // Product/service information
+  Product product = 2;
+  
+  // Quantity invoiced
+  Quantity quantity_invoiced = 3;
+  
+  // Unit price
+  Price unit_price = 4;
+  
+  // Extended price
+  Price extended_price = 5;
+  
+  // Invoice date for this line item
+  string invoice_date = 6;
+  
+  // Additional line item notes
+  repeated string notes = 7;
+  
+  // Tax information
+  repeated TaxInformation tax_info = 8;
+}
+
+// Tax information for invoice line items
+message TaxInformation {
+  // Tax type code
+  string tax_type_code = 1;
+  
+  // Tax amount
+  Price tax_amount = 2;
+  
+  // Tax rate
+  double tax_rate = 3;
+  
+  // Tax jurisdiction
+  string tax_jurisdiction = 4;
+}
+
+// EDI 856 Advance Ship Notice Data
+message AdvanceShipNoticeData {
+  // Shipment identification number
+  string shipment_id = 1;
+  
+  // Shipment date
+  string shipment_date = 2;
+  
+  // Expected delivery date
+  string expected_delivery_date = 3;
+  
+  // Ship-from party
+  Party ship_from = 4;
+  
+  // Ship-to party
+  Party ship_to = 5;
+  
+  // Bill-to party
+  Party bill_to = 6;
+  
+  // Carrier information
+  Party carrier = 7;
+  
+  // Shipment details
+  repeated ShipmentDetail shipment_details = 8;
+  
+  // Reference numbers
+  repeated ReferenceNumber reference_numbers = 9;
+  
+  // Additional notes
+  repeated string notes = 10;
+}
+
+// Shipment detail for ASN
+message ShipmentDetail {
+  // Package identification
+  string package_id = 1;
+  
+  // Package type
+  string package_type = 2;
+  
+  // Package weight
+  Quantity weight = 3;
+  
+  // Package dimensions
+  PackageDimensions dimensions = 4;
+  
+  // Items in this package
+  repeated PackageItem items = 5;
+  
+  // Tracking number
+  string tracking_number = 6;
+}
+
+// Package dimensions
+message PackageDimensions {
+  // Length
+  double length = 1;
+  
+  // Width
+  double width = 2;
+  
+  // Height
+  double height = 3;
+  
+  // Unit of measure
+  string unit_of_measure = 4;
+}
+
+// Item within a package
+message PackageItem {
+  // Product information
+  Product product = 1;
+  
+  // Quantity shipped
+  Quantity quantity_shipped = 2;
+  
+  // Serial numbers
+  repeated string serial_numbers = 3;
+  
+  // Lot numbers
+  repeated string lot_numbers = 4;
+}
+
+// EDI 997 Functional Acknowledgment Data
+message FunctionalAcknowledgmentData {
+  // Original transaction set identifier
+  string original_transaction_set_id = 1;
+  
+  // Original control number
+  string original_control_number = 2;
+  
+  // Functional acknowledgment code
+  string acknowledgment_code = 3;
+  
+  // Processing date
+  string processing_date = 4;
+  
+  // Processing time
+  string processing_time = 5;
+  
+  // Sender identification
+  string sender_id = 6;
+  
+  // Receiver identification
+  string receiver_id = 7;
+  
+  // Transaction set acknowledgment details
+  repeated TransactionSetAcknowledgment transaction_set_acks = 8;
+  
+  // Segment acknowledgments
+  repeated SegmentAcknowledgment segment_acks = 9;
+  
+  // Element acknowledgments
+  repeated ElementAcknowledgment element_acks = 10;
+}
+
+// Transaction set acknowledgment
+message TransactionSetAcknowledgment {
+  // Transaction set identifier
+  string transaction_set_id = 1;
+  
+  // Control number
+  string control_number = 2;
+  
+  // Acknowledgment code
+  string acknowledgment_code = 3;
+  
+  // Error messages
+  repeated string error_messages = 4;
+}
+
+// Segment acknowledgment
+message SegmentAcknowledgment {
+  // Segment identifier
+  string segment_id = 1;
+  
+  // Segment position
+  int32 position = 2;
+  
+  // Acknowledgment code
+  string acknowledgment_code = 3;
+  
+  // Error messages
+  repeated string error_messages = 4;
+}
+
+// Element acknowledgment
+message ElementAcknowledgment {
+  // Element position
+  int32 position = 1;
+  
+  // Element value
+  string value = 2;
+  
+  // Acknowledgment code
+  string acknowledgment_code = 3;
+  
+  // Error messages
+  repeated string error_messages = 4;
+}
